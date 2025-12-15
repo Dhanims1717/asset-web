@@ -1,130 +1,113 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Detail Aset Hotel Cordela Inn Palembang</title>
+  <meta charset="UTF-8">
+  <title>Detail Aset</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 0;
-}
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-.wrapper {
-  max-width: 900px;
-  margin: 40px auto;
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-}
-
-h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-.container {
-  display: flex;
-  gap: 30px;
-}
-
-.box {
-  border: 1px solid #ddd;
-  padding: 20px;
-  border-radius: 6px;
-  width: 100%;
-}
-
-.box h3 {
-  margin-top: 0;
-}
-
-.btn {
-  display: block;
-  text-decoration: none;
-  padding: 12px;
-  margin-top: 12px;
-  text-align: center;
-  color: white;
-  border-radius: 5px;
-  font-weight: bold;
-}
-
-.btn-report { background: #d9534f; }
-.btn-sheet  { background: #0275d8; }
-
-@media (max-width: 700px) {
-  .container {
-    flex-direction: column;
-  }
-}
-</style>
+  <style>
+    body {
+      background-color: #f4f6f9;
+    }
+    .asset-card {
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    .badge-kondisi {
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="wrapper">
-  <h2>Detail Aset</h2>
-
-  <div class="container">
-    <!-- DETAIL ASET -->
-    <div class="box" id="data">Memuat data...</div>
-
-    <!-- AKSI -->
-    <div class="box">
-      <h3>Aksi</h3>
-      <a id="btnReport" class="btn btn-report" target="_blank">
-        🛠 Lapor Kerusakan
-      </a>
-      <a id="btnSheet" class="btn btn-sheet" target="_blank">
-        📄 Buka Google Sheet
-      </a>
+<div class="container">
+  <div class="card asset-card shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">📦 Detail Aset</h5>
+    </div>
+    <div class="card-body" id="data">
+      <p class="text-muted">Memuat data aset...</p>
     </div>
   </div>
 </div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const assetId = params.get('id');
+const assetId = (params.get('id') || "").trim().toUpperCase();
 
-const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
+// CSV Google Sheet
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
 
-const formLink  = "https://docs.google.com/forms/d/e/1FAIpQLSfNmNSnM3ywD-7QbuQ6h6hAI1xx9P6sbruGXKYGrbn3Y37GPA/viewform";
-const sheetLink = "https://docs.google.com/spreadsheets/d/1mHwb-hMGIFHoO9qBteIQlMC-Nb4WACVnkxmjpwvaMR4/edit?usp=sharing";
+// 🔧 GANTI LINK INI
+const formKerusakan = "https://forms.gle/XXXXXXXX";
+const sheetBarang   = "https://docs.google.com/spreadsheets/d/FILE_ID/edit";
 
-fetch(sheetCSV)
-.then(res => res.text())
-.then(text => {
-  const rows = text.split("\n").slice(1);
-  let found = false;
+function badgeKondisi(text) {
+  text = (text || "").toLowerCase();
 
-  rows.forEach(row => {
-    const col = row.split(",");
+  if (text.includes("baik")) return `<span class="badge bg-success badge-kondisi">Baik</span>`;
+  if (text.includes("rusak")) return `<span class="badge bg-danger badge-kondisi">Rusak</span>`;
+  if (text.includes("perbaikan")) return `<span class="badge bg-warning text-dark badge-kondisi">Perbaikan</span>`;
 
-    if (col[0].trim() === assetId) {
-      found = true;
+  return `<span class="badge bg-secondary badge-kondisi">${text || "-"}</span>`;
+}
 
-      document.getElementById("data").innerHTML = `
-        <b>ID Aset:</b> ${col[0]}<br><br>
-        <b>Nama Barang:</b> ${col[1]}<br>
-        <b>Kategori:</b> ${col[2]}<br>
-        <b>Lokasi:</b> ${col[3]}<br>
-        <b>Kondisi:</b> ${col[4]}
-      `;
+if (!assetId) {
+  document.getElementById("data").innerHTML =
+    `<div class="alert alert-danger">Asset ID tidak ditemukan</div>`;
+} else {
+  fetch(sheetURL)
+    .then(r => r.text())
+    .then(csv => {
+      const rows = csv.split(/\r?\n/);
+      let found = false;
 
-      document.getElementById("btnReport").href =
-        formLink + "?entry.123456=" + encodeURIComponent(assetId);
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue;
 
-      document.getElementById("btnSheet").href = sheetLink;
-    }
-  });
+        const col = rows[i].split(",");
+        const sheetId = (col[0] || "").trim().toUpperCase();
 
-  if (!found) {
-    document.getElementById("data").innerText = "Aset tidak ditemukan";
-  }
-});
+        if (sheetId === assetId) {
+          found = true;
+
+          document.getElementById("data").innerHTML = `
+            <table class="table table-bordered">
+              <tr><th width="35%">ID Aset</th><td>${col[0]}</td></tr>
+              <tr><th>Nama Barang</th><td>${col[1] || "-"}</td></tr>
+              <tr><th>Kategori</th><td>${col[2] || "-"}</td></tr>
+              <tr><th>Lokasi</th><td>${col[3] || "-"}</td></tr>
+              <tr><th>Kondisi</th><td>${badgeKondisi(col[4])}</td></tr>
+              <tr><th>PIC</th><td>${col[5] || "-"}</td></tr>
+            </table>
+
+            <div class="d-grid gap-2 mt-3">
+              <a href="${formKerusakan}" target="_blank" class="btn btn-outline-danger">
+                🚨 Laporkan Kerusakan
+              </a>
+              <a href="${sheetBarang}" target="_blank" class="btn btn-outline-primary">
+                📋 Daftar Barang
+              </a>
+            </div>
+          `;
+          break;
+        }
+      }
+
+      if (!found) {
+        document.getElementById("data").innerHTML =
+          `<div class="alert alert-warning">Aset tidak ditemukan</div>`;
+      }
+    })
+    .catch(() => {
+      document.getElementById("data").innerHTML =
+        `<div class="alert alert-danger">Gagal memuat data</div>`;
+    });
+}
 </script>
 
 </body>
