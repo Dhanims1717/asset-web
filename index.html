@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <title>Detail Aset Hotel Cordela Inn Palembang</title>
@@ -7,7 +7,22 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.wrapper {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .container {
@@ -16,42 +31,57 @@ body {
 }
 
 .box {
-  border: 1px solid #ccc;
-  padding: 15px;
-  width: 300px;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.box h3 {
+  margin-top: 0;
 }
 
 .btn {
   display: block;
   text-decoration: none;
-  padding: 10px;
-  margin-top: 10px;
+  padding: 12px;
+  margin-top: 12px;
   text-align: center;
   color: white;
   border-radius: 5px;
+  font-weight: bold;
 }
 
 .btn-report { background: #d9534f; }
 .btn-sheet  { background: #0275d8; }
+
+@media (max-width: 700px) {
+  .container {
+    flex-direction: column;
+  }
+}
 </style>
 </head>
 
 <body>
-<h2>Detail Aset</h2>
 
-<div class="container">
-  <!-- DETAIL ASET -->
-  <div class="box" id="data">Memuat data...</div>
+<div class="wrapper">
+  <h2>Detail Aset</h2>
 
-  <!-- TOMBOL -->
-  <div class="box">
-    <h3>Aksi</h3>
-    <a id="btnReport" class="btn btn-report" target="_blank">
-      🛠 Lapor Kerusakan
-    </a>
-    <a id="btnSheet" class="btn btn-sheet" target="_blank">
-      📄 Buka Google Sheet
-    </a>
+  <div class="container">
+    <!-- DETAIL ASET -->
+    <div class="box" id="data">Memuat data...</div>
+
+    <!-- AKSI -->
+    <div class="box">
+      <h3>Aksi</h3>
+      <a id="btnReport" class="btn btn-report" target="_blank">
+        🛠 Lapor Kerusakan
+      </a>
+      <a id="btnSheet" class="btn btn-sheet" target="_blank">
+        📄 Buka Google Sheet
+      </a>
+    </div>
   </div>
 </div>
 
@@ -61,7 +91,6 @@ const assetId = params.get('id');
 
 const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
 
-// GANTI LINK INI
 const formLink  = "https://docs.google.com/forms/d/e/1FAIpQLSfNmNSnM3ywD-7QbuQ6h6hAI1xx9P6sbruGXKYGrbn3Y37GPA/viewform";
 const sheetLink = "https://docs.google.com/spreadsheets/d/1mHwb-hMGIFHoO9qBteIQlMC-Nb4WACVnkxmjpwvaMR4/edit?usp=sharing";
 
@@ -78,15 +107,13 @@ fetch(sheetCSV)
       found = true;
 
       document.getElementById("data").innerHTML = `
-        <b>ID Aset:</b> ${col[0]}<br>
+        <b>ID Aset:</b> ${col[0]}<br><br>
         <b>Nama Barang:</b> ${col[1]}<br>
         <b>Kategori:</b> ${col[2]}<br>
         <b>Lokasi:</b> ${col[3]}<br>
-        <b>Kondisi:</b> ${col[4]}<br>
-        
+        <b>Kondisi:</b> ${col[4]}
       `;
 
-      // SET LINK TOMBOL
       document.getElementById("btnReport").href =
         formLink + "?entry.123456=" + encodeURIComponent(assetId);
 
@@ -99,5 +126,6 @@ fetch(sheetCSV)
   }
 });
 </script>
+
 </body>
 </html>
