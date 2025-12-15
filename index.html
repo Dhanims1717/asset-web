@@ -11,11 +11,42 @@ const sheetList = [
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=130752718&output=csv",
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=1268094999&output=csv",
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=1350866735&output=csv",
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=719158736&output=csv",
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=719158736&output=csv"
 ];
 
 /* ================================
-   FUNGSI BADGE KONDISI
+   CSV PARSER (AMAN DARI KOMA)
+================================ */
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let current = "";
+  let insideQuotes = false;
+
+  for (let char of text) {
+    if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === "," && !insideQuotes) {
+      row.push(current.trim());
+      current = "";
+    } else if (char === "\n" && !insideQuotes) {
+      row.push(current.trim());
+      rows.push(row);
+      row = [];
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  if (current) {
+    row.push(current.trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+/* ================================
+   BADGE KONDISI
 ================================ */
 function badgeKondisi(text) {
   text = (text || "").toLowerCase();
@@ -26,7 +57,7 @@ function badgeKondisi(text) {
 }
 
 /* ================================
-   PROSES BACA SEMUA SHEET
+   LOAD ASSET DARI SEMUA SHEET
 ================================ */
 async function loadAsset() {
   if (!assetId) {
@@ -38,13 +69,11 @@ async function loadAsset() {
   for (const url of sheetList) {
     try {
       const res = await fetch(url);
-      const csv = await res.text();
-      const rows = csv.split(/\r?\n/);
+      const csvText = await res.text();
+      const rows = parseCSV(csvText);
 
       for (let i = 1; i < rows.length; i++) {
-        if (!rows[i].trim()) continue;
-
-        const col = rows[i].split(",");
+        const col = rows[i];
         const sheetId = (col[0] || "").trim().toUpperCase();
 
         if (sheetId === assetId) {
@@ -58,11 +87,11 @@ async function loadAsset() {
               <tr><th>PIC</th><td>${col[5] || "-"}</td></tr>
             </table>
           `;
-          return; // STOP kalau sudah ketemu
+          return; // STOP setelah ketemu
         }
       }
-    } catch (err) {
-      console.error("Gagal baca sheet:", url);
+    } catch (e) {
+      console.error("Gagal baca:", url);
     }
   }
 
