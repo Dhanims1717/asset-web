@@ -43,8 +43,8 @@ const assetId = (params.get('id') || "").trim().toUpperCase();
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
 
 // 🔧 GANTI LINK INI
-const formKerusakan = "https://forms.gle/XXXXXXXX";
-const sheetBarang   = "https://docs.google.com/spreadsheets/d/FILE_ID/edit";
+const formKerusakan = "https://forms.gle/Y5fvaEwtPRr689q88";
+const sheetBarang   = "https://docs.google.com/spreadsheets/d/1mHwb-hMGIFHoO9qBteIQlMC-Nb4WACVnkxmjpwvaMR4/edit?usp=sharing";
 
 function badgeKondisi(text) {
   text = (text || "").toLowerCase();
@@ -82,7 +82,6 @@ if (!assetId) {
               <tr><th>Kategori</th><td>${col[2] || "-"}</td></tr>
               <tr><th>Lokasi</th><td>${col[3] || "-"}</td></tr>
               <tr><th>Kondisi</th><td>${badgeKondisi(col[4])}</td></tr>
-              <tr><th>PIC</th><td>${col[5] || "-"}</td></tr>
             </table>
 
             <div class="d-grid gap-2 mt-3">
