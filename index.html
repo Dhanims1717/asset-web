@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Detail Aset</title>
+</head>
+<body>
+  <h2>Detail Aset</h2>
+  <div id="data">Memuat data...</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const assetId = params.get('id');
+
+const sheetURL = "PASTE_LINK_PUBLISH_SHEET_KAMU_DI_SINI";
+
+fetch(sheetURL)
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.split("\n").slice(1);
+    let found = false;
+
+    rows.forEach(r => {
+      const col = r.split(",");
+      if (col[0] === assetId) {
+        found = true;
+        document.getElementById("data").innerHTML = `
+          <b>ID:</b> ${col[0]}<br>
+          <b>Nama:</b> ${col[1]}<br>
+          <b>Kategori:</b> ${col[2]}<br>
+          <b>Lokasi:</b> ${col[3]}<br>
+          <b>Kondisi:</b> ${col[4]}<br>
+          <b>PIC:</b> ${col[5]}
+        `;
+      }
+    });
+
+    if (!found) {
+      document.getElementById("data").innerText = "Aset tidak ditemukan";
+    }
+  });
+</script>
+</body>
+</html>
