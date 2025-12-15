@@ -1,45 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>Detail Aset</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <h2>Detail Aset</h2>
-  <div id="data">Memuat data...</div>
+
+<h2>Detail Aset</h2>
+<div id="data">Memuat data...</div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const assetId = params.get('id');
+const assetId = params.get('id')?.trim().toUpperCase();
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTK1-TsARAkRW0ficjGE1rzWNWGSdN6_LknRQVUPhbm6MkEtcgYLc0H1x6SWnlDUrvVQxnFWjYUkBB6/pub?output=csv
-";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTK1-TsARAkRW0ficjGE1rzWNWGSdN6_LknRQVUPhbm6MkEtcgYLc0H1x6SWnlDUrvVQxnFWjYUkBB6/pub?output=csv";
 
-fetch(sheetURL)
-  .then(res => res.text())
-  .then(text => {
-    const rows = text.split("\n").slice(1);
-    let found = false;
+if (!assetId) {
+  document.getElementById("data").innerText = "Asset ID tidak ditemukan di URL";
+} else {
+  fetch(sheetURL)
+    .then(res => res.text())
+    .then(text => {
+      const rows = text.split("\n").slice(1);
+      let found = false;
 
-    rows.forEach(r => {
-      const col = r.split(",");
-      if (col[0] === assetId) {
-        found = true;
-        document.getElementById("data").innerHTML = `
-          <b>ID:</b> ${col[0]}<br>
-          <b>Nama:</b> ${col[1]}<br>
-          <b>Kategori:</b> ${col[2]}<br>
-          <b>Lokasi:</b> ${col[3]}<br>
-          <b>Kondisi:</b> ${col[4]}<br>
-          <b>PIC:</b> ${col[5]}
-        `;
+      rows.forEach(r => {
+        if (!r.trim()) return;
+
+        const col = r.split(",");
+        const sheetAssetId = col[0]?.trim().toUpperCase();
+
+        if (sheetAssetId === assetId) {
+          found = true;
+          document.getElementById("data").innerHTML = `
+            <b>ID:</b> ${col[0]}<br>
+            <b>Nama:</b> ${col[1] || "-"}<br>
+            <b>Kategori:</b> ${col[2] || "-"}<br>
+            <b>Lokasi:</b> ${col[3] || "-"}<br>
+            <b>Kondisi:</b> ${col[4] || "-"}<br>
+            <b>PIC:</b> ${col[5] || "-"}
+          `;
+        }
+      });
+
+      if (!found) {
+        document.getElementById("data").innerText = "Aset tidak ditemukan";
       }
+    })
+    .catch(err => {
+      document.getElementById("data").innerText = "Gagal memuat data";
+      console.error(err);
     });
-
-    if (!found) {
-      document.getElementById("data").innerText = "Aset tidak ditemukan";
-    }
-  });
+}
 </script>
+
 </body>
 </html>
