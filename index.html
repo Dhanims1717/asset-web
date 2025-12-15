@@ -36,35 +36,56 @@
 </div>
 
 <script>
+/* ================================
+   AMBIL ID DARI QR (?id=)
+================================ */
 const params = new URLSearchParams(window.location.search);
 const assetId = (params.get('id') || "").trim().toUpperCase();
 
-// CSV Google Sheet
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
+/* ================================
+   DAFTAR CSV SEMUA SHEET
+================================ */
+const sheetList = [
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=0&output=csv",          // HK
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=1802188553&output=csv", // FP
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=130752718&output=csv",  // FB
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=1268094999&output=csv", // IT
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=1350866735&output=csv", // EG
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?gid=719158736&output=csv"   // ACT
+];
 
-// 🔧 GANTI LINK INI
+/* ================================
+   LINK AKSI
+================================ */
 const formKerusakan = "https://forms.gle/Y5fvaEwtPRr689q88";
 const sheetBarang   = "https://docs.google.com/spreadsheets/d/1mHwb-hMGIFHoO9qBteIQlMC-Nb4WACVnkxmjpwvaMR4/edit?usp=sharing";
 
+/* ================================
+   BADGE KONDISI
+================================ */
 function badgeKondisi(text) {
   text = (text || "").toLowerCase();
-
   if (text.includes("baik")) return `<span class="badge bg-success badge-kondisi">Baik</span>`;
   if (text.includes("rusak")) return `<span class="badge bg-danger badge-kondisi">Rusak</span>`;
   if (text.includes("perbaikan")) return `<span class="badge bg-warning text-dark badge-kondisi">Perbaikan</span>`;
-
   return `<span class="badge bg-secondary badge-kondisi">${text || "-"}</span>`;
 }
 
-if (!assetId) {
-  document.getElementById("data").innerHTML =
-    `<div class="alert alert-danger">Asset ID tidak ditemukan</div>`;
-} else {
-  fetch(sheetURL)
-    .then(r => r.text())
-    .then(csv => {
+/* ================================
+   PROSES BACA SEMUA SHEET
+================================ */
+(async () => {
+  if (!assetId) {
+    document.getElementById("data").innerHTML =
+      `<div class="alert alert-danger">Asset ID tidak ditemukan</div>`;
+    return;
+  }
+
+  for (const sheetURL of sheetList) {
+    try {
+      const r = await fetch(sheetURL);
+      const csv = await r.text();
       const rows = csv.split(/\r?\n/);
-      let found = false;
 
       for (let i = 1; i < rows.length; i++) {
         if (!rows[i].trim()) continue;
@@ -73,8 +94,6 @@ if (!assetId) {
         const sheetId = (col[0] || "").trim().toUpperCase();
 
         if (sheetId === assetId) {
-          found = true;
-
           document.getElementById("data").innerHTML = `
             <table class="table table-bordered">
               <tr><th width="35%">ID Asset</th><td>${col[0]}</td></tr>
@@ -93,22 +112,18 @@ if (!assetId) {
               </a>
             </div>
           `;
-          break;
+          return; // STOP jika ketemu
         }
       }
+    } catch (e) {
+      console.error("Gagal baca sheet:", sheetURL);
+    }
+  }
 
-      if (!found) {
-        document.getElementById("data").innerHTML =
-          `<div class="alert alert-warning">Aset tidak ditemukan</div>`;
-      }
-    })
-    .catch(() => {
-      document.getElementById("data").innerHTML =
-        `<div class="alert alert-danger">Gagal memuat data</div>`;
-    });
-}
+  document.getElementById("data").innerHTML =
+    `<div class="alert alert-warning">Aset tidak ditemukan</div>`;
+})();
 </script>
 
 </body>
 </html>
-
