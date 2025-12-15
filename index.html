@@ -114,6 +114,17 @@ if (!assetId) {
                 <tr><th>Kategori</th><td>${col[2] || "-"}</td></tr>
                 <tr><th>Lokasi</th><td>${col[3] || "-"}</td></tr>
                 <tr><th>Kondisi</th><td>${badgeKondisi(col[4])}</td></tr>
+                <tr>
+                    <th>QR Code</th>
+                    <td class="text-center">
+                      <img 
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(col[6])}"
+                        alt="QR Aset"
+                        class="img-fluid border rounded"
+                      >
+                    </td>
+                  </tr>
+
               </table>
 
               <div class="d-grid gap-2 mt-3">
