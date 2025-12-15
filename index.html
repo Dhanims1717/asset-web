@@ -4,56 +4,100 @@
   <meta charset="UTF-8">
   <title>Detail Aset</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+    }
+    .asset-card {
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    .badge-kondisi {
+      font-size: 0.9rem;
+      padding: 6px 10px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Detail Aset</h2>
-<div id="data">Memuat data...</div>
+<div class="container">
+  <div class="card asset-card shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">📦 Detail Aset</h5>
+    </div>
+    <div class="card-body" id="data">
+      <p class="text-muted">Memuat data aset...</p>
+    </div>
+  </div>
+</div>
 
 <script>
-// Ambil asset ID dari URL
 const params = new URLSearchParams(window.location.search);
-const assetId = params.get('id')?.trim().toUpperCase();
+const assetId = (params.get('id') || "").trim().toUpperCase();
 
-// LINK CSV GOOGLE SHEET (BARU)
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
 
+function badgeKondisi(text) {
+  text = (text || "").toLowerCase();
+
+  if (text.includes("baik")) return `<span class="badge bg-success badge-kondisi">Baik</span>`;
+  if (text.includes("rusak")) return `<span class="badge bg-danger badge-kondisi">Rusak</span>`;
+  if (text.includes("perbaikan")) return `<span class="badge bg-warning text-dark badge-kondisi">Perbaikan</span>`;
+
+  return `<span class="badge bg-secondary badge-kondisi">${text || "-"}</span>`;
+}
+
 if (!assetId) {
-  document.getElementById("data").innerText = "Asset ID tidak ditemukan di URL";
+  document.getElementById("data").innerHTML =
+    `<div class="alert alert-danger">Asset ID tidak ditemukan</div>`;
 } else {
   fetch(sheetURL)
-    .then(res => res.text())
-    .then(text => {
-      const rows = text.split("\n").slice(1); // skip header
+    .then(r => r.text())
+    .then(csv => {
+      const rows = csv.split(/\r?\n/);
       let found = false;
 
-      rows.forEach(row => {
-        if (!row.trim()) return;
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue;
 
-        const col = row.split(",");
+        const col = rows[i].split(",");
+        const sheetId = (col[0] || "").trim().toUpperCase();
 
-        const sheetAssetId = col[0]?.trim().toUpperCase();
-
-        if (sheetAssetId === assetId) {
+        if (sheetId === assetId) {
           found = true;
+
           document.getElementById("data").innerHTML = `
-            <b>ID Aset:</b> ${col[0]}<br>
-            <b>Nama Barang:</b> ${col[1] || "-"}<br>
-            <b>Lokasi:</b> ${col[2] || "-"}<br>
-            <b>Kondisi:</b> ${col[3] || "-"}<br>
-            <b>Keterangan:</b> ${col[4] || "-"}<br>
-            
+            <table class="table table-bordered">
+              <tr><th width="35%">ID Aset</th><td>${col[0]}</td></tr>
+              <tr><th>Nama Barang</th><td>${col[1] || "-"}</td></tr>
+              <tr><th>Kategori</th><td>${col[2] || "-"}</td></tr>
+              <tr><th>Lokasi</th><td>${col[3] || "-"}</td></tr>
+              <tr><th>Kondisi</th><td>${badgeKondisi(col[4])}</td></tr>
+              <tr><th>PIC</th><td>${col[5] || "-"}</td></tr>
+            </table>
+
+            <div class="d-grid gap-2 mt-3">
+              <a href="https://forms.gle/FBQxvummTAPJMkgDA" class="btn btn-outline-danger">
+                🚨 Laporkan Kerusakan
+              </a>
+            </div>
           `;
+          break;
         }
-      });
+      }
 
       if (!found) {
-        document.getElementById("data").innerText = "Aset tidak ditemukan";
+        document.getElementById("data").innerHTML =
+          `<div class="alert alert-warning">Aset tidak ditemukan</div>`;
       }
     })
-    .catch(err => {
-      document.getElementById("data").innerText = "Gagal memuat data";
-      console.error(err);
+    .catch(() => {
+      document.getElementById("data").innerHTML =
+        `<div class="alert alert-danger">Gagal memuat data</div>`;
     });
 }
 </script>
