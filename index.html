@@ -12,7 +12,8 @@
 const params = new URLSearchParams(window.location.search);
 const assetId = params.get('id');
 
-const sheetURL = "PASTE_LINK_PUBLISH_SHEET_KAMU_DI_SINI";
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTK1-TsARAkRW0ficjGE1rzWNWGSdN6_LknRQVUPhbm6MkEtcgYLc0H1x6SWnlDUrvVQxnFWjYUkBB6/pub?output=csv
+";
 
 fetch(sheetURL)
   .then(res => res.text())
