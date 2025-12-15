@@ -11,10 +11,12 @@
 <div id="data">Memuat data...</div>
 
 <script>
+// Ambil asset ID dari URL
 const params = new URLSearchParams(window.location.search);
 const assetId = params.get('id')?.trim().toUpperCase();
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTK1-TsARAkRW0ficjGE1rzWNWGSdN6_LknRQVUPhbm6MkEtcgYLc0H1x6SWnlDUrvVQxnFWjYUkBB6/pub?output=csv";
+// LINK CSV GOOGLE SHEET (BARU)
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRrCSj8LkK4jgexXAggrcwR8T9dg4vgRCq2HWMBVbDaWzo5cZXanwUJpFwGVMhjVjOPygZ4XUHb3CSq/pub?output=csv";
 
 if (!assetId) {
   document.getElementById("data").innerText = "Asset ID tidak ditemukan di URL";
@@ -22,20 +24,21 @@ if (!assetId) {
   fetch(sheetURL)
     .then(res => res.text())
     .then(text => {
-      const rows = text.split("\n").slice(1);
+      const rows = text.split("\n").slice(1); // skip header
       let found = false;
 
-      rows.forEach(r => {
-        if (!r.trim()) return;
+      rows.forEach(row => {
+        if (!row.trim()) return;
 
-        const col = r.split(",");
+        const col = row.split(",");
+
         const sheetAssetId = col[0]?.trim().toUpperCase();
 
         if (sheetAssetId === assetId) {
           found = true;
           document.getElementById("data").innerHTML = `
-            <b>ID:</b> ${col[0]}<br>
-            <b>Nama:</b> ${col[1] || "-"}<br>
+            <b>ID Aset:</b> ${col[0]}<br>
+            <b>Nama Barang:</b> ${col[1] || "-"}<br>
             <b>Kategori:</b> ${col[2] || "-"}<br>
             <b>Lokasi:</b> ${col[3] || "-"}<br>
             <b>Kondisi:</b> ${col[4] || "-"}<br>
